@@ -1,0 +1,9 @@
+if SHIELD_BUGBEARZMNRIGHT
+
+config ZMK_KEYBOARD_NAME
+    default "BugBear ZMK Right"
+
+config ZMK_SPLIT_ROLE_CENTRAL
+    default y
+
+endif
