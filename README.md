@@ -14,7 +14,7 @@ This is a complete ZMK configuration for a 30-key split keyboard with PS/2 Track
 - Controller: nice!nano v2
 - TrackPoint: Connected to pins 8 (DATA) and 9 (CLK)
 - Voltage: 3.3V through voltage regulator
-- Right side is the central (brain)
+- Right side is the central (brain) 
 
 ## Features
 
