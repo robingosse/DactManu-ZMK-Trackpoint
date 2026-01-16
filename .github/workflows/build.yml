@@ -1,3 +1,53 @@
-include:
-  - board: nice_nano_v2
-    shield: bugbearzmnright
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: zmkfirmware/zmk-build-arm:stable
+    name: Build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Cache west modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            modules/
+            tools/
+            zephyr/
+            bootloader/
+          key: ${{ runner.os }}-west-${{ hashFiles('config/west.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-west-
+            
+      - name: West Init
+        run: west init -l config
+        
+      - name: West Update
+        run: west update
+        
+      - name: West Zephyr export
+        run: west zephyr-export
+        
+      - name: West Build
+        run: west build -s zmk/app -b nice_nano_v2 -- -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" -DSHIELD=bugbearzmnright
+        
+      - name: Rename artifact
+        run: cp build/zephyr/zmk.uf2 bugbearzmnright.uf2
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware
+          path: bugbearzmnright.uf2
