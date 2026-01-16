@@ -7,12 +7,11 @@ manifest:
     - name: petejohanson
       url-base: https://github.com/petejohanson
       
-  projects:
-    # Use Pete Johanson's mouse fork (actively maintained)
-    - name: zmk
-      remote: petejohanson
-      revision: feat/pointers-move-scroll
-      import: app/west.yml
+projects:
+  - name: zmk
+    remote: urob
+    revision: main
+    import: app/west.yml
     
     # PS/2 driver module
     - name: kb_zmk_ps2_mouse_trackpoint_driver
