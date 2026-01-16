@@ -8,7 +8,7 @@ manifest:
   projects:
     - name: zmk
       remote: infused-kim
-      revision: pr-testing/mouse_ps2_module_base
+      revision: 47bd2cc46de99f722e57e27e3a28d7ea367a880a  # Known working
       import: app/west.yml
     
     - name: kb_zmk_ps2_mouse_trackpoint_driver
