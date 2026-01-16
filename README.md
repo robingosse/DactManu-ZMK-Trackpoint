@@ -5,7 +5,7 @@ This is a complete ZMK configuration for a 30-key split keyboard with PS/2 Track
 ## Quick Start
 
 1. **Upload this to your GitHub repository** named `zmk-config`
-2. **GitHub Actions will automatically build your firmware**
+2. **GitHub Actions will automatically build your firmware** 
 3. **Download the firmware** from Actions → Latest build → Artifacts
 4. **Flash to your nice!nano** by copying the .uf2 file
 
