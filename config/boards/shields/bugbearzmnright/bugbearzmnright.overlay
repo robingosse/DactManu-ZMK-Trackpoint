@@ -47,22 +47,20 @@
     };
 
     /*
-     * PS/2 TrackPoint (GPIO / bit-banged transport)
-     *
-     * You stated your wiring:
-     *   DATA -> Nice!Nano pin 9
+     * PS/2 TrackPoint over GPIO (bit-banged)
+     * Your wiring:
      *   CLK  -> Nice!Nano pin 8
+     *   DATA -> Nice!Nano pin 9
      *
      * PS/2 naming:
-     *   sda = data
      *   scl = clock
+     *   sda = data
      */
     gpio_ps2: gpio_ps2 {
         status = "okay";
         compatible = "gpio-ps2";
-
-        scl-gpios = <&pro_micro 8 GPIO_ACTIVE_HIGH>;  /* CLK  (pin 8) */
-        sda-gpios = <&pro_micro 9 GPIO_ACTIVE_HIGH>;  /* DATA (pin 9) */
+        scl-gpios = <&pro_micro 8 GPIO_ACTIVE_HIGH>;  /* CLK */
+        sda-gpios = <&pro_micro 9 GPIO_ACTIVE_HIGH>;  /* DATA */
     };
 
     mouse_ps2: mouse_ps2 {
