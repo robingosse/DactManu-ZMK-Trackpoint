@@ -8,11 +8,13 @@ manifest:
       url-base: https://github.com/urob
 
   projects:
+    # ZMK fork WITH mouse support (this is the critical fix)
     - name: zmk
       remote: urob
-      revision: main
+      revision: mouse-keys
       import: app/west.yml
 
+    # PS/2 TrackPoint driver
     - name: kb_zmk_ps2_mouse_trackpoint_driver
       remote: infused-kim
       revision: main
