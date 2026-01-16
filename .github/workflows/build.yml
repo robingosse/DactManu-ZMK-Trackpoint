@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: zmkfirmware/zmk-build-arm:stable
-    name: Build
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,11 +37,13 @@ jobs:
       - name: West Update
         run: west update
 
-      - name: Patch PS/2 module for current ZMK API
+      # Patch #1: PS/2 module vs ZMK API mismatch
+      - name: Patch PS/2 module for current ZMK layer API
         shell: bash
         run: |
           set -euo pipefail
           FILE="kb_zmk_ps2_mouse_trackpoint_driver/src/mouse/input_listener_ps2.c"
+
           if [ ! -f "$FILE" ]; then
             echo "ERROR: Expected file not found: $FILE"
             echo "Repo root contents:"
@@ -50,17 +52,70 @@ jobs:
           fi
 
           NEEDLE='zmk_keymap_layer_activate(config->layer_toggle, false);'
-          if ! grep -qF "$NEEDLE" "$FILE"; then
-            echo "ERROR: Expected line not found in $FILE"
-            echo "Showing matching lines (if any):"
+          if grep -qF "$NEEDLE" "$FILE"; then
+            sed -i 's/zmk_keymap_layer_activate(config->layer_toggle, false);/zmk_keymap_layer_activate(config->layer_toggle);/' "$FILE"
+            echo "Patched: removed extra arg from zmk_keymap_layer_activate()"
+          else
+            echo "NOTE: PS/2 patch not applied (line not found). Showing any activate calls:"
             grep -n "zmk_keymap_layer_activate" "$FILE" || true
+          fi
+
+      # Patch #2: ZMK fork missing ZMK_SPLIT_BLE_PERIPHERAL_COUNT macro
+      - name: Patch ZMK BLE macro ZMK_SPLIT_BLE_PERIPHERAL_COUNT if missing
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="zmk/app/src/ble.c"
+
+          if [ ! -f "$FILE" ]; then
+            echo "ERROR: Expected file not found: $FILE"
+            echo "Repo root contents:"
+            ls -la
             exit 1
           fi
 
-          sed -i 's/zmk_keymap_layer_activate(config->layer_toggle, false);/zmk_keymap_layer_activate(config->layer_toggle);/' "$FILE"
+          # If the macro is already defined somewhere in this file, do nothing.
+          if grep -qE '^\s*#\s*define\s+ZMK_SPLIT_BLE_PERIPHERAL_COUNT\b' "$FILE"; then
+            echo "Macro already defined in $FILE. No patch needed."
+            exit 0
+          fi
 
-          echo "Patch applied. Verifying:"
-          grep -n "zmk_keymap_layer_activate" "$FILE"
+          # Insert a safe default right after the last #include line.
+          # Default peripheral count for a 2-half split is 1 peripheral.
+          awk '
+            BEGIN { inserted=0 }
+            {
+              print $0
+              if (!inserted && $0 ~ /^#include/) {
+                last_include_line=NR
+              }
+            }
+            END { }
+          ' "$FILE" > /tmp/ble.c.tmp
+
+          # Now do the actual insertion using a second awk pass to place after the final include.
+          awk '
+            BEGIN { inserted=0; lastinc=0 }
+            /^#include/ { lastinc=NR }
+            { lines[NR]=$0 }
+            END {
+              for (i=1; i<=NR; i++) {
+                print lines[i]
+                if (i==lastinc && inserted==0) {
+                  print ""
+                  print "#ifndef ZMK_SPLIT_BLE_PERIPHERAL_COUNT"
+                  print "#define ZMK_SPLIT_BLE_PERIPHERAL_COUNT 1"
+                  print "#endif"
+                  print ""
+                  inserted=1
+                }
+              }
+            }
+          ' "$FILE" > /tmp/ble.c.patched
+
+          mv /tmp/ble.c.patched "$FILE"
+          echo "Patched: added default ZMK_SPLIT_BLE_PERIPHERAL_COUNT=1 to $FILE"
+          grep -n "ZMK_SPLIT_BLE_PERIPHERAL_COUNT" "$FILE" | head -n 20 || true
 
       - name: West Zephyr export
         run: west zephyr-export
