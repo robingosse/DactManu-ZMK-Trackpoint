@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Cache west modules
         uses: actions/cache@v4
         with:
@@ -30,22 +30,47 @@ jobs:
           key: ${{ runner.os }}-west-${{ hashFiles('config/west.yml') }}
           restore-keys: |
             ${{ runner.os }}-west-
-            
+
       - name: West Init
         run: west init -l config
-        
+
       - name: West Update
         run: west update
-        
+
+      - name: Patch PS/2 module for current ZMK API
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="kb_zmk_ps2_mouse_trackpoint_driver/src/mouse/input_listener_ps2.c"
+          if [ ! -f "$FILE" ]; then
+            echo "ERROR: Expected file not found: $FILE"
+            echo "Repo root contents:"
+            ls -la
+            exit 1
+          fi
+
+          NEEDLE='zmk_keymap_layer_activate(config->layer_toggle, false);'
+          if ! grep -qF "$NEEDLE" "$FILE"; then
+            echo "ERROR: Expected line not found in $FILE"
+            echo "Showing matching lines (if any):"
+            grep -n "zmk_keymap_layer_activate" "$FILE" || true
+            exit 1
+          fi
+
+          sed -i 's/zmk_keymap_layer_activate(config->layer_toggle, false);/zmk_keymap_layer_activate(config->layer_toggle);/' "$FILE"
+
+          echo "Patch applied. Verifying:"
+          grep -n "zmk_keymap_layer_activate" "$FILE"
+
       - name: West Zephyr export
         run: west zephyr-export
-        
+
       - name: West Build
         run: west build -s zmk/app -b nice_nano_v2 -- -DZMK_CONFIG="${GITHUB_WORKSPACE}/config" -DSHIELD=bugbearzmnright
-        
+
       - name: Rename artifact
         run: cp build/zephyr/zmk.uf2 bugbearzmnright.uf2
-        
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
