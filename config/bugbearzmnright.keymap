@@ -1,42 +1,31 @@
 /*
- * Copyright (c) 2025 Robin Gosse
- * SPDX-License-Identifier: MIT
+ * bugbearzmnright.keymap
+ * Valid ZMK devicetree keymap
  */
 
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
-#include <dt-bindings/zmk/mouse.h>
+#include <dt-bindings/zmk/outputs.h>
 
-/ {
-    keymap {
-        compatible = "zmk,keymap";
+&keymap {
+    compatible = "zmk,keymap";
 
-        default_layer {
-            bindings = <
-                &kp Q &kp W &kp E &kp R &kp T   &kp Y &kp U &kp I     &kp O   &kp P
-                &kp A &kp S &kp D &kp F &kp G   &kp H &kp J &kp K     &kp L   &kp SEMI
-                &kp Z &kp X &kp C &kp V &kp B   &kp N &kp M &kp COMMA &kp DOT &kp FSLH
-                            &mo 1 &kp LSHIFT     &kp SPACE &mo 2
-            >;
-        };
+    default_layer {
+        bindings = <
+            &kp Q &kp W &kp E &kp R &kp T   &kp Y &kp U &kp I &kp O &kp P
+            &kp A &kp S &kp D &kp F &kp G   &kp H &kp J &kp K &kp L &kp SEMI
+            &kp Z &kp X &kp C &kp V &kp B   &kp N &kp M &kp COMMA &kp DOT &kp SLASH
+                          &kp LSHIFT        &kp SPACE        &kp ENTER
+        >;
+    };
 
-        mouse_layer {
-            bindings = <
-                &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans
-                &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans
-                &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans
-                            &studio_unlock &mkp LCLK     &mkp RCLK &out OUT_USB
-            >;
-        };
-
-        function_layer {
-            bindings = <
-                &kp N1 &kp N2 &kp N3 &kp N4 &kp N5   &kp N6 &kp N7 &kp N8 &kp N9 &kp N0
-                &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans
-                &trans &trans &trans &trans &trans   &trans &trans &trans &trans &trans
-                            &trans &trans             &trans &trans
-            >;
-        };
+    fn_layer {
+        bindings = <
+            &kp N1 &kp N2 &kp N3 &kp N4 &kp N5   &kp N6 &kp N7 &kp N8 &kp N9 &kp N0
+            &trans &trans &trans &trans &trans  &trans &trans &trans &trans &trans
+            &trans &trans &trans &trans &trans  &trans &trans &trans &trans &trans
+                          &trans              &out OUT_USB   &out OUT_BLE
+        >;
     };
 };
